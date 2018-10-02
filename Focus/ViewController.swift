@@ -16,6 +16,8 @@ import UIKit
 // It controls everything about UI
 class ViewController: UIViewController {
 
+    // MARK: VIEWVIEW
+    
     
     // Focus가 클래스이기 떄문에,
     // 모든 변수들이 초기화되면 인수가없는 init을 자동으로 가지게 된다.
@@ -23,10 +25,15 @@ class ViewController: UIViewController {
     // lazy means it doens't actually initialize until someone uses
     // lazy counts as this var as initialized
     // lazy can't have didSet
-    lazy var game = Focus(numberOfPairsOfCards: (cardButtons.count+1) / 2)
+    private lazy var game = Focus(numberOfPairsOfCards: numberOfPairsOfCards)
+    
+    // computed c
+    var numberOfPairsOfCards: Int{
+            return (cardButtons.count+1) / 2
+    }
     
     // Instance variable means property
-    var flipCount = 0 {
+    private(set) var flipCount = 0 {
         didSet{
             flipCountLabel.text = "Flips: \(flipCount)"
         }
@@ -36,13 +43,13 @@ class ViewController: UIViewController {
     
     // Outlet creates instance variable
     // ! means it doesn't have to be initialized
-    @IBOutlet weak var flipCountLabel: UILabel!
+    @IBOutlet private weak var flipCountLabel: UILabel!
     
     
     // OutletCollection is array of the things in the UI
     // [UIButton] means array of UIButtons
     // When you change cardButtons, you should use Command + Rename
-    @IBOutlet var cardButtons: [UIButton]!
+    @IBOutlet private var cardButtons: [UIButton]!
     
     // @IBAction is put by Xcode
     // In Swift, each parameter has each name
@@ -50,7 +57,7 @@ class ViewController: UIViewController {
     // Action creates method
     
     // Int? is optional Int which has two values set or notSet.
-    @IBAction func touchCard(_ sender: UIButton) {
+    @IBAction private func touchCard(_ sender: UIButton) {
         flipCount += 1
         
         if let cardNumber = cardButtons.index(of: sender){
@@ -65,7 +72,7 @@ class ViewController: UIViewController {
     }
     
     
-    func updateViewFromModel(){
+    private func updateViewFromModel(){
         for index in cardButtons.indices {
             let button = cardButtons[index]
             let card = game.cards[index]
@@ -80,27 +87,29 @@ class ViewController: UIViewController {
         }
     }
     
-    var emoji = [Int:String]()
+    private var emoji = [Int:String]()
     
-    var emojiChoices = ["👻", "🎃", "👹", "👺"]
+    private var emojiChoices = ["👻", "🎃", "👹", "👺"]
     
-    func emoji(for card: Card) -> String{
+    private func emoji(for card: Card) -> String{
         if emoji[card.identifier] == nil, emojiChoices.count > 0{
-            let randomIndex = Int(arc4random_uniform(UInt32(emojiChoices.count)))
-            emoji[card.identifier] = emojiChoices.remove(at: randomIndex)
+            emoji[card.identifier] = emojiChoices.remove(at: emojiChoices.count.arc4random)
         }
-        
-        /*
-        // another way to treat optional
-        if emoji[card.identifier] != nil{
-            return emoji[card.identifier]!
-        }
-        else{
-            return "?"
-        }
-        */
         return emoji[card.identifier] ?? "?"
         
     }
 }
 
+extension Int {
+    var arc4random: Int {
+        if self > 0 {
+            return Int(arc4random_uniform(UInt32(self)))
+        } else if self < 0 {
+            return -Int(arc4random_uniform(UInt32(abs(self))))
+        } else {
+            return 0
+        }
+    }
+}
+
+ 
